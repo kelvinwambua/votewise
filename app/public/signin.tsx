@@ -1,19 +1,32 @@
-import { GoogleIcon } from '@/components/icons/google-icon';
-import { authClient } from '@/lib/auth-client';
-import { Link, router } from 'expo-router';
-import { useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { GoogleIcon } from "@/components/icons/google-icon";
+import { authClient } from "@/lib/auth-client";
+import { Link, router } from "expo-router";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Dimensions,
+} from "react-native";
+import Svg, { Path } from "react-native-svg";
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function SignInScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
 
   const handleSignIn = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
@@ -22,11 +35,14 @@ export default function SignInScreen() {
       await authClient.signIn.email({
         email,
         password,
-        callbackURL:"/(tabs)"
+        callbackURL: "/(tabs)",
       });
-      router.replace('/(tabs)');
+      router.replace("/(tabs)");
     } catch (error: any) {
-      Alert.alert('Sign In Failed', error.message || 'Invalid email or password');
+      Alert.alert(
+        "Sign In Failed",
+        error.message || "Invalid email or password",
+      );
     } finally {
       setLoading(false);
     }
@@ -36,131 +52,132 @@ export default function SignInScreen() {
     setLoading(true);
     try {
       await authClient.signIn.social({
-        provider: 'google',
-        callbackURL:"/(tabs)"
+        provider: "google",
+        callbackURL: "/(tabs)",
       });
-      router.replace('/(tabs)');
+      router.replace("/(tabs)");
     } catch (error: any) {
-      Alert.alert('Google Sign In Failed', error.message || 'Something went wrong');
+      Alert.alert(
+        "Google Sign In Failed",
+        error.message || "Something went wrong",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={[styles.container, { backgroundColor: isDark ? '#0F172A' : '#F8FAFC' }]}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
     >
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.content}>
-          <View style={styles.headerSection}>
-            <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.1)' }]}>
-              <Text style={styles.icon}>🗳️</Text>
-            </View>
-            <Text style={[styles.title, { color: isDark ? '#FFFFFF' : '#1E293B' }]}>Welcome Back</Text>
-            <Text style={[styles.subtitle, { color: isDark ? '#94A3B8' : '#64748B' }]}>
-              Sign in to continue your civic journey
-            </Text>
+      <View style={styles.flagSection}>
+        <Image
+          source={require("@/assets/images/KenyanFlag.jpg")}
+          style={styles.flag}
+          resizeMode="cover"
+        />
+        <Svg
+          height="100%"
+          width="100%"
+          style={styles.wavyOverlay}
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+        >
+          <Path
+            d="M 0 100
+               C 5 95, 8 88, 10 82
+               C 12 76, 14 72, 16 68
+               C 18 64, 20 61, 22 58
+               C 24 55, 26 53, 28 50
+               C 30 47, 32 45, 34 42
+               C 36 39, 38 37, 40 34
+               C 42 31, 44 29, 46 26
+               C 48 23, 50 21, 52 18
+               C 54 15, 56 13, 58 11
+               C 60 9, 62 7.5, 64 6
+               C 66 4.5, 68 3.5, 70 2.5
+               C 72 1.8, 74 1.2, 76 0.8
+               C 78 0.5, 80 0.3, 82 0.2
+               C 84 0.1, 86 0.05, 88 0.03
+               C 90 0.01, 92 0, 94 0
+               L 100 0
+               L 100 100
+               Z"
+            fill="white"
+          />
+        </Svg>
+      </View>
+
+      <View style={styles.content}>
+        <View style={styles.headerSection}>
+          <Text style={styles.title}>Log in to your account</Text>
+          <View style={styles.subtitleContainer}>
+            <Text style={styles.subtitle}>New to VoteWise? </Text>
+            <Link href="/public" asChild>
+              <TouchableOpacity disabled={loading}>
+                <Text style={styles.subtitleLink}>Create an account</Text>
+              </TouchableOpacity>
+            </Link>
+          </View>
+        </View>
+
+        <View style={styles.formContainer}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={styles.input}
+              placeholder=""
+              placeholderTextColor="#94A3B8"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              editable={!loading}
+            />
           </View>
 
-          <View style={styles.formContainer}>
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: isDark ? '#E2E8F0' : '#334155' }]}>Email Address</Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
-                    color: isDark ? '#FFFFFF' : '#1E293B',
-                    borderColor: isDark ? '#334155' : '#E2E8F0',
-                  }
-                ]}
-                placeholder="you@example.com"
-                placeholderTextColor={isDark ? '#64748B' : '#94A3B8'}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                editable={!loading}
-              />
-            </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={styles.input}
+              placeholder=""
+              placeholderTextColor="#94A3B8"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              editable={!loading}
+            />
+          </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: isDark ? '#E2E8F0' : '#334155' }]}>Password</Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
-                    color: isDark ? '#FFFFFF' : '#1E293B',
-                    borderColor: isDark ? '#334155' : '#E2E8F0',
-                  }
-                ]}
-                placeholder="••••••••"
-                placeholderTextColor={isDark ? '#64748B' : '#94A3B8'}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                editable={!loading}
-              />
-            </View>
+          <TouchableOpacity
+            style={[styles.button, loading && styles.buttonDisabled]}
+            onPress={handleSignIn}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.buttonText}>Login</Text>
+            )}
+          </TouchableOpacity>
 
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>Or</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <View style={styles.socialContainer}>
             <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={handleSignIn}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.buttonText}>Sign In</Text>
-              )}
-            </TouchableOpacity>
-
-            <View style={styles.divider}>
-              <View style={[styles.dividerLine, { backgroundColor: isDark ? '#334155' : '#CBD5E1' }]} />
-              <Text style={[styles.dividerText, { color: isDark ? '#94A3B8' : '#64748B' }]}>or continue with</Text>
-              <View style={[styles.dividerLine, { backgroundColor: isDark ? '#334155' : '#CBD5E1' }]} />
-            </View>
-
-            <TouchableOpacity
-              style={[
-                styles.googleButton,
-                {
-                  backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
-                  borderColor: isDark ? '#334155' : '#E2E8F0',
-                },
-                loading && styles.buttonDisabled
-              ]}
+              style={[styles.socialButton, loading && styles.buttonDisabled]}
               onPress={handleGoogleSignIn}
               disabled={loading}
             >
-              <View style={styles.googleContent}>
-                <GoogleIcon width={20} height={20} />
-                <Text style={[styles.googleButtonText, { color: isDark ? '#FFFFFF' : '#1E293B' }]}>
-                  Continue with Google
-                </Text>
-              </View>
+              <GoogleIcon width={24} height={24} />
             </TouchableOpacity>
-
-            <View style={styles.footer}>
-              <Text style={[styles.footerText, { color: isDark ? '#94A3B8' : '#64748B' }]}>
-                Don&apos;t have an account?{' '}
-              </Text>
-              <Link href="/public" asChild>
-                <TouchableOpacity disabled={loading}>
-                  <Text style={styles.link}>Sign Up</Text>
-                </TouchableOpacity>
-              </Link>
-            </View>
           </View>
         </View>
-      </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -168,120 +185,132 @@ export default function SignInScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#FFFFFF",
   },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingVertical: 40,
+  flagSection: {
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT * 0.4,
+    position: "relative",
+    overflow: "hidden",
+  },
+  flag: {
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+  },
+  wavyOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    top: 0,
   },
   content: {
+    flex: 1,
     paddingHorizontal: 24,
+    justifyContent: "center",
   },
   headerSection: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  icon: {
-    fontSize: 40,
+    alignItems: "center",
+    marginBottom: 32,
   },
   title: {
-    fontSize: 32,
-    fontFamily: 'Manrope_800ExtraBold',
+    fontSize: 20,
+    fontFamily: "Manrope_700Bold",
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: "center",
+    color: "#1E293B",
+  },
+  subtitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   subtitle: {
-    fontSize: 16,
-    fontFamily: 'Manrope_400Regular',
-    textAlign: 'center',
-    paddingHorizontal: 20,
-    lineHeight: 24,
+    fontSize: 14,
+    fontFamily: "Manrope_400Regular",
+    color: "#64748B",
+  },
+  subtitleLink: {
+    fontSize: 14,
+    fontFamily: "Manrope_600SemiBold",
+    color: "#16A34A",
   },
   formContainer: {
-    width: '100%',
+    width: "100%",
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   label: {
     fontSize: 14,
-    fontFamily: 'Manrope_600SemiBold',
+    fontFamily: "Manrope_500Medium",
     marginBottom: 8,
+    color: "#1E293B",
   },
   input: {
-    height: 56,
+    height: 48,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 8,
     paddingHorizontal: 16,
     fontSize: 16,
-    fontFamily: 'Manrope_400Regular',
+    fontFamily: "Manrope_400Regular",
+    backgroundColor: "#FFFFFF",
+    color: "#1E293B",
+    borderColor: "#E2E8F0",
   },
   button: {
-    height: 56,
-    borderRadius: 12,
-    backgroundColor: '#3B82F6',
-    justifyContent: 'center',
-    alignItems: 'center',
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: "#16A34A",
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 8,
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontFamily: 'Manrope_700Bold',
+    fontFamily: "Manrope_600SemiBold",
   },
   divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 28,
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 20,
   },
   dividerLine: {
     flex: 1,
     height: 1,
+    backgroundColor: "#E2E8F0",
   },
   dividerText: {
     marginHorizontal: 16,
     fontSize: 14,
-    fontFamily: 'Manrope_500Medium',
+    fontFamily: "Manrope_400Regular",
+    color: "#64748B",
   },
-  googleButton: {
-    height: 56,
-    borderRadius: 12,
+  socialContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 16,
+  },
+  socialButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  googleContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  googleButtonText: {
-    fontSize: 16,
-    fontFamily: 'Manrope_600SemiBold',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 32,
-  },
-  footerText: {
-    fontSize: 14,
-    fontFamily: 'Manrope_400Regular',
-  },
-  link: {
-    color: '#3B82F6',
-    fontSize: 14,
-    fontFamily: 'Manrope_700Bold',
+    borderColor: "#E2E8F0",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
 });
