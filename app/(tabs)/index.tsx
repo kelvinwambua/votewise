@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
   View,
   Dimensions,
+  Linking,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -22,6 +24,25 @@ export default function DashboardScreen() {
   console.log("Dashboard", dashboardData);
   const { data: session } = authClient.useSession();
   console.log("Session", session);
+
+  const handleResourcePress = async (url: string | undefined) => {
+    if (!url) {
+      Alert.alert("Error", "No URL available for this resource");
+      return;
+    }
+
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("Error", "Cannot open this URL");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to open the link");
+      console.error("Error opening URL:", error);
+    }
+  };
 
   if (dashboardData === undefined) {
     return (
@@ -191,6 +212,7 @@ export default function DashboardScreen() {
                   index !== resources.slice(0, 3).length - 1 &&
                     styles.resourceItemBorder,
                 ]}
+                onPress={() => handleResourcePress(resource.url)}
               >
                 <View style={styles.resourceContent}>
                   <Text style={styles.resourceTitle}>{resource.title}</Text>

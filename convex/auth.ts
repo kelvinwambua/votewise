@@ -49,6 +49,8 @@ export const createAuth = (
             try {
               await convexClient.mutation(api.dashboard.createUser, {
                 authId: newSession.user.id,
+                name: newSession.user.name,
+                email: newSession.user.email,
               });
 
               console.log(

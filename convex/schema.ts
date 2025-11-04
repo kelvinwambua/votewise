@@ -1,10 +1,11 @@
 import { defineSchema, defineTable } from "convex/server";
-
 import { v } from "convex/values";
 
 const schema = defineSchema({
   profile: defineTable({
     userId: v.string(),
+    name: v.string(),
+    email: v.string(),
     points: v.number(),
     rank: v.optional(v.string()),
     modulesCompleted: v.number(),
@@ -21,14 +22,23 @@ const schema = defineSchema({
     title: v.string(),
     description: v.string(),
     content: v.string(),
+    imageUrl: v.optional(v.string()),
+    status: v.union(
+      v.literal("published"),
+      v.literal("coming_soon"),
+      v.literal("locked"),
+    ),
     order: v.number(),
     duration: v.optional(v.number()),
     category: v.optional(v.string()),
+    badgeIcon: v.optional(v.string()),
+    badgeText: v.optional(v.string()),
     isPublished: v.boolean(),
     createdAt: v.number(),
   })
     .index("by_order", ["order"])
-    .index("by_published", ["isPublished"]),
+    .index("by_published", ["isPublished"])
+    .index("by_status", ["status"]),
 
   userModuleProgress: defineTable({
     userId: v.string(),
@@ -37,6 +47,11 @@ const schema = defineSchema({
     startedAt: v.optional(v.number()),
     completedAt: v.optional(v.number()),
     progress: v.number(),
+    currentQuestionIndex: v.number(),
+    flashcardsCompleted: v.number(),
+    multipleChoiceCompleted: v.number(),
+    totalFlashcards: v.number(),
+    totalMultipleChoice: v.number(),
   })
     .index("by_userId", ["userId"])
     .index("by_moduleId", ["moduleId"])
@@ -86,6 +101,42 @@ const schema = defineSchema({
     .index("by_order", ["order"])
     .index("by_type", ["type"])
     .index("by_active", ["isActive"]),
+
+  flashcards: defineTable({
+    moduleId: v.id("modules"),
+    question: v.string(),
+    answer: v.string(),
+    order: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_moduleId", ["moduleId"])
+    .index("by_moduleId_and_order", ["moduleId", "order"]),
+
+  multipleChoiceQuestions: defineTable({
+    moduleId: v.id("modules"),
+    question: v.string(),
+    options: v.array(v.string()),
+    correctAnswer: v.number(),
+    explanation: v.optional(v.string()),
+    order: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_moduleId", ["moduleId"])
+    .index("by_moduleId_and_order", ["moduleId", "order"]),
+
+  userQuestionProgress: defineTable({
+    userId: v.string(),
+    moduleId: v.id("modules"),
+    questionId: v.union(v.id("flashcards"), v.id("multipleChoiceQuestions")),
+    questionType: v.union(v.literal("flashcard"), v.literal("multiple_choice")),
+    completed: v.boolean(),
+    correct: v.optional(v.boolean()),
+    answeredAt: v.optional(v.number()),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_moduleId", ["moduleId"])
+    .index("by_userId_and_moduleId", ["userId", "moduleId"])
+    .index("by_questionId", ["questionId"]),
 
   quizzes: defineTable({
     moduleId: v.id("modules"),

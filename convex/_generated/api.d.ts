@@ -11,6 +11,9 @@
 import type * as auth from "../auth.js";
 import type * as dashboard from "../dashboard.js";
 import type * as http from "../http.js";
+import type * as leaderboard from "../leaderboard.js";
+import type * as lesson from "../lesson.js";
+import type * as modules from "../modules.js";
 
 import type {
   ApiFromModules,
@@ -30,6 +33,9 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   dashboard: typeof dashboard;
   http: typeof http;
+  leaderboard: typeof leaderboard;
+  lesson: typeof lesson;
+  modules: typeof modules;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 
